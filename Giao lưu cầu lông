@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Badminton Drop-in Manager</title>
+
+  <style>
+    :root {
+      --primary: #16a34a;
+      --primary-dark: #15803d;
+      --secondary: #0f172a;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --success-bg: #dcfce7;
+      --warning-bg: #fef3c7;
+      --danger-bg: #fee2e2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Inter, Arial, sans-serif;
+      background: var(--bg);
+      color: #0f172a;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* Layout */
+    .app {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: var(--secondary);
+      color: white;
+      padding: 24px 16px;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 20px;
+      margin-bottom: 35px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 21px;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .menu button {
+      border: none;
+      background: transparent;
+      color: #cbd5e1;
+      text-align: left;
+      padding: 13px 14px;
+      border-radius: 10px;
+      transition: .2s;
+    }
+
+    .menu button:hover,
+    .menu button.active {
+      background: #1e293b;
+      color: white;
+    }
+
+    .menu button.active {
+      color: #86efac;
+    }
+
+    .main {
+      margin-left: 250px;
+      width: calc(100% - 250px);
+      padding: 28px;
+    }
+
+    /* Header */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .topbar h1 {
+      font-size: 28px;
+    }
+
+    .topbar p {
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .btn {
+      border: none;
+      padding: 11px 16px;
+      border-radius: 9px;
+      font-weight: 700;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .btn-danger {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    /* Cards */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 20px;
+    }
+
+    .stat-title {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .stat-icon {
+      font-size: 24px;
+      float: right;
+    }
+
+    /* Content */
+    .grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    /* Event */
+    .event-box {
+      background: linear-gradient(135deg, #166534, #16a34a);
+      color: white;
+      border-radius: 15px;
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    .event-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .event-name {
+      font-size: 23px;
+      font-weight: 800;
+    }
+
+    .event-info {
+      margin-top: 8px;
+      color: #dcfce7;
+    }
+
+    .event-price {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .event-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .event-actions button {
+      background: white;
+      color: #166534;
+      border: none;
+      padding: 9px 13px;
+      border-radius: 8px;
+      font-weight: 700;
+    }
+
+    /* Table */
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 13px 10px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .badge {
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-block;
+    }
+
+    .badge-success {
+      background: var(--success-bg);
+      color: #166534;
+    }
+
+    .badge-warning {
+      background: var(--warning-bg);
+      color: #92400e;
+    }
+
+    .badge-danger {
+      background: var(--danger-bg);
+      color: #991b1b;
+    }
+
+    .action-btn {
+      border: none;
+      padding: 7px 10px;
+      border-radius: 7px;
+      margin-right: 4px;
+    }
+
+    /* Court */
+    .courts {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .court {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 15px;
+    }
+
+    .court.active {
+      border-color: #22c55e;
+      background: #f0fdf4;
+    }
+
+    .court-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .players {
+      color: var(--muted);
+      font-size: 13px;
+      min-height: 40px;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, .55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 99;
+    }
+
+    .modal.show {
+      display: flex;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 520px;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .close {
+      border: none;
+      background: transparent;
+      font-size: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      border-color: var(--primary);
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .search {
+      width: 230px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 35px;
+      color: var(--muted);
+    }
+
+    /* Mobile */
+    @media (max-width: 900px) {
+      .sidebar {
+        width: 70px;
+        padding: 18px 10px;
+      }
+
+      .brand span,
+      .menu button span {
+        display: none;
+      }
+
+      .brand {
+        justify-content: center;
+      }
+
+      .menu button {
+        text-align: center;
+        font-size: 20px;
+      }
+
+      .main {
+        margin-left: 70px;
+        width: calc(100% - 70px);
+        padding: 18px;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .courts {
+        grid-template-columns: 1fr;
+      }
+
+      .event-top {
+        flex-direction: column;
+      }
+
+      .search {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">🏸</div>
+      <span>Badminton Hub</span>
+    </div>
+
+    <div class="menu">
+      <button class="active" onclick="showPage('dashboard', this)">
+        📊 <span>Tổng quan</span>
+      </button>
+
+      <button onclick="showPage('players', this)">
+        👥 <span>Người chơi</span>
+      </button>
+
+      <button onclick="showPage('matches', this)">
+        🏸 <span>Trận đấu</span>
+      </button>
+
+      <button onclick="showPage('events', this)">
+        📅 <span>Buổi giao lưu</span>
+      </button>
+
+      <button onclick="showPage('finance', this)">
+        💰 <span>Thu phí</span>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="page active">
+
+      <div class="topbar">
+        <div>
+          <h1>Tổng quan</h1>
+          <p>Quản lý buổi giao lưu cầu lông vãng lai</p>
+        </div>
+
+        <button class="btn btn-primary" onclick="openPlayerModal()">
+          + Thêm người chơi
+        </button>
+      </div>
+
+      <div class="stats">
+
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-title">Người tham gia</div>
+          <div class="stat-value" id="statPlayers">0</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">🏸</div>
+          <div class="stat-title">Trận hôm nay</div>
+          <div class="stat-value" id="statMatches">0</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">💰</div>
+          <div class="stat-title">Doanh thu</div>
+          <div class="stat-value" id="statRevenue">0đ</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">🏟️</div>
+          <div class="stat-title">Sân đang dùng</div>
+          <div class="stat-value" id="statCourts">0/4</div>
+        </div>
+
+      </div>
+
+      <div class="grid">
+
+        <div>
+
+          <div class="event-box">
+            <div class="event-top">
+              <div>
+                <div class="event-name">
+                  Giao lưu tối thứ 4
+                </div>
+
+                <div class="event-info">
+                  📅 Hôm nay · 18:00 - 21:00
+                </div>
+
+                <div class="event-info">
+                  📍 Sân cầu lông ZSpace
+                </div>
+              </div>
+
+              <div>
+                <div class="event-price">80.000đ</div>
+                <small> / người</small>
+              </div>
+            </div>
+
+            <div class="event-actions">
+              <button onclick="openPlayerModal()">
+                + Thêm người
+              </button>
+
+              <button onclick="showPage('matches')">
+                🏸 Xếp trận
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                Người chơi mới nhất
+              </div>
+
+              <button
+                class="btn btn-secondary"
+                onclick="showPage('players')"
+              >
+                Xem tất cả
+              </button>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Tên</th>
+                    <th>SĐT</th>
+                    <th>Trình độ</th>
+                    <th>Check-in</th>
+                    <th>Thanh toán</th>
+                  </tr>
+                </thead>
+
+                <tbody id="dashboardPlayers"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                Sân hôm nay
+              </div>
+            </div>
+
+            <div class="courts" id="courtDashboard"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                Thống kê
+              </div>
+            </div>
+
+            <p style="color:#64748b;line-height:1.7">
+              Hệ thống đang theo dõi hoạt động của buổi giao lưu hiện tại.
+              Dữ liệu được lưu trực tiếp trên trình duyệt.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- PLAYERS -->
+    <section id="players" class="page">
+
+      <div class="topbar">
+        <div>
+          <h1>Người chơi</h1>
+          <p>Danh sách người tham gia buổi giao lưu</p>
+        </div>
+
+        <button class="btn btn-primary" onclick="openPlayerModal()">
+          + Thêm người chơi
+        </button>
+      </div>
+
+      <div class="card">
+
+        <div class="card-header">
+
+          <div class="card-title">
+            Danh sách người chơi
+          </div>
+
+          <input
+            id="playerSearch"
+            class="search"
+            placeholder="🔎 Tìm tên hoặc SĐT..."
+            oninput="renderPlayers()"
+          />
+
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Người chơi</th>
+                <th>SĐT</th>
+                <th>Trình độ</th>
+                <th>Check-in</th>
+                <th>Thanh toán</th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody id="playersTable"></tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- MATCHES -->
+    <section id="matches" class="page">
+
+      <div class="topbar">
+        <div>
+          <h1>Trận đấu</h1>
+          <p>Quản lý và chia trận cho người chơi</p>
+        </div>
+
+        <button class="btn btn-primary" onclick="createMatch()">
+          🎲 Tạo trận mới
+        </button>
+      </div>
+
+      <div class="card">
+
+        <div class="card-header">
+          <div class="card-title">
+            Các trận đang diễn ra
+          </div>
+        </div>
+
+        <div id="matchesList"></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- EVENTS -->
+    <section id="events" class="page">
+
+      <div class="topbar">
+        <div>
+          <h1>Buổi giao lưu</h1>
+          <p>Quản lý lịch giao lưu</p>
+        </div>
+
+        <button class="btn btn-primary" onclick="createEvent()">
+          + Tạo buổi giao lưu
+        </button>
+      </div>
+
+      <div class="card">
+
+        <div class="card-title" style="margin-bottom:20px">
+          Buổi giao lưu
+        </div>
+
+        <div class="event-box">
+
+          <div class="event-top">
+
+            <div>
+              <div class="event-name">
+                Giao lưu tối thứ 4
+              </div>
+
+              <div class="event-info">
+                📅 30/09/2026 · 18:00 - 21:00
+              </div>
+
+              <div class="event-info">
+                👥 Tối đa 32 người
+              </div>
+            </div>
+
+            <div class="event-price">
+              80.000đ
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- FINANCE -->
+    <section id="finance" class="page">
+
+      <div class="topbar">
+        <div>
+          <h1>Thu phí</h1>
+          <p>Theo dõi tiền tham gia giao lưu</p>
+        </div>
+      </div>
+
+      <div class="stats">
+
+        <div class="stat-card">
+          <div class="stat-title">Tổng phải thu</div>
+          <div class="stat-value" id="financeTotal">0đ</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-title">Đã thu</div>
+          <div class="stat-value" id="financePaid">0đ</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-title">Còn thiếu</div>
+          <div class="stat-value" id="financeDebt">0đ</div>
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <div class="table-wrap">
+
+          <table>
+            <thead>
+              <tr>
+                <th>Người chơi</th>
+                <th>Phí</th>
+                <th>Trạng thái</th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody id="financeTable"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+
+<!-- PLAYER MODAL -->
+<div class="modal" id="playerModal">
+
+  <div class="modal-box">
+
+    <div class="modal-header">
+
+      <h2>Thêm người chơi</h2>
+
+      <button
+        class="close"
+        onclick="closePlayerModal()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <form onsubmit="addPlayer(event)">
+
+      <div class="form-group">
+        <label>Họ tên</label>
+        <input
+          id="playerName"
+          required
+          placeholder="Nguyễn Văn A"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Số điện thoại</label>
+        <input
+          id="playerPhone"
+          placeholder="09xxxxxxxx"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Trình độ</label>
+
+        <select id="playerLevel">
+
+          <option value="Mới chơi">
+            Mới chơi
+          </option>
+
+          <option value="Phong trào">
+            Phong trào
+          </option>
+
+          <option value="Trung bình">
+            Trung bình
+          </option>
+
+          <option value="Khá">
+            Khá
+          </option>
+
+          <option value="Tốt">
+            Tốt
+          </option>
+
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Phí tham gia</label>
+
+        <input
+          id="playerFee"
+          type="number"
+          value="80000"
+          min="0"
+        />
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick="closePlayerModal()"
+        >
+          Hủy
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn-primary"
+        >
+          Thêm người chơi
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  /* =========================
+     DATA
+  ========================= */
+
+  let players =
+    JSON.parse(localStorage.getItem("badminton_players")) || [
+
+      {
+        id: 1,
+        name: "Minh Anh",
+        phone: "0901234567",
+        level: "Phong trào",
+        checkedIn: true,
+        paid: true,
+        fee: 80000
+      },
+
+      {
+        id: 2,
+        name: "Hoàng Nam",
+        phone: "0912345678",
+        level: "Trung bình",
+        checkedIn: true,
+        paid: false,
+        fee: 80000
+      },
+
+      {
+        id: 3,
+        name: "Thu Hà",
+        phone: "0987654321",
+        level: "Khá",
+        checkedIn: false,
+        paid: true,
+        fee: 80000
+      }
+
+    ];
+
+
+  let matches =
+    JSON.parse(localStorage.getItem("badminton_matches")) || [
+
+      {
+        id: 1,
+        court: 1,
+        players: ["Minh Anh", "Hoàng Nam"],
+        status: "Đang chơi"
+      },
+
+      {
+        id: 2,
+        court: 2,
+        players: ["Thu Hà"],
+        status: "Đang chờ"
+      }
+
+    ];
+
+
+  function saveData() {
+
+    localStorage.setItem(
+      "badminton_players",
+      JSON.stringify(players)
+    );
+
+    localStorage.setItem(
+      "badminton_matches",
+      JSON.stringify(matches)
+    );
+
+  }
+
+
+  /* =========================
+     NAVIGATION
+  ========================= */
+
+  function showPage(pageId, button) {
+
+    document
+      .querySelectorAll(".page")
+      .forEach(page => page.classList.remove("active"));
+
+    document
+      .getElementById(pageId)
+      .classList.add("active");
+
+    document
+      .querySelectorAll(".menu button")
+      .forEach(btn => btn.classList.remove("active"));
+
+    if (button) {
+      button.classList.add("active");
+    }
+
+    renderAll();
+
+  }
+
+
+  /* =========================
+     PLAYER MODAL
+  ========================= */
+
+  function openPlayerModal() {
+
+    document
+      .getElementById("playerModal")
+      .classList.add("show");
+
+    document
+      .getElementById("playerName")
+      .focus();
+
+  }
+
+
+  function closePlayerModal() {
+
+    document
+      .getElementById("playerModal")
+      .classList.remove("show");
+
+  }
+
+
+  /* =========================
+     ADD PLAYER
+  ========================= */
+
+  function addPlayer(event) {
+
+    event.preventDefault();
+
+    const player = {
+
+      id: Date.now(),
+
+      name:
+        document
+          .getElementById("playerName")
+          .value
+          .trim(),
+
+      phone:
+        document
+          .getElementById("playerPhone")
+          .value
+          .trim(),
+
+      level:
+        document
+          .getElementById("playerLevel")
+          .value,
+
+      fee:
+        Number(
+          document
+            .getElementById("playerFee")
+            .value
+        ),
+
+      checkedIn: false,
+
+      paid: false
+
+    };
+
+
+    players.push(player);
+
+    saveData();
+
+    event.target.reset();
+
+    document.getElementById("playerFee").value = 80000;
+
+    closePlayerModal();
+
+    renderAll();
+
+  }
+
+
+  /* =========================
+     PLAYERS TABLE
+  ========================= */
+
+  function renderPlayers() {
+
+    const search =
+      document
+        .getElementById("playerSearch")
+        ?.value
+        .toLowerCase() || "";
+
+
+    const filtered =
+      players.filter(player =>
+
+        player.name
+          .toLowerCase()
+          .includes(search)
+
+        ||
+
+        player.phone
+          .toLowerCase()
+          .includes(search)
+
+      );
+
+
+    const table =
+      document.getElementById("playersTable");
+
+
+    if (!filtered.length) {
+
+      table.innerHTML = `
+        <tr>
+          <td colspan="7" class="empty">
+            Chưa có người chơi
+          </td>
+        </tr>
+      `;
+
+      return;
+
+    }
+
+
+    table.innerHTML =
+      filtered.map((player, index) => `
+
+        <tr>
+
+          <td>${index + 1}</td>
+
+          <td>
+            <strong>${escapeHtml(player.name)}</strong>
+          </td>
+
+          <td>
+            ${escapeHtml(player.phone || "-")}
+          </td>
+
+          <td>
+            ${player.level}
+          </td>
+
+          <td>
+
+            <button
+              class="badge ${
+                player.checkedIn
+                ? "badge-success"
+                : "badge-warning"
+              }"
+              onclick="toggleCheckin(${player.id})"
+            >
+
+              ${
+                player.checkedIn
+                ? "✓ Đã check-in"
+                : "Chưa check-in"
+              }
+
+            </button>
+
+          </td>
+
+          <td>
+
+            <button
+              class="badge ${
+                player.paid
+                ? "badge-success"
+                : "badge-danger"
+              }"
+              onclick="togglePaid(${player.id})"
+            >
+
+              ${
+                player.paid
+                ? "✓ Đã thu"
+                : "Chưa thu"
+              }
+
+            </button>
+
+          </td>
+
+          <td>
+
+            <button
+              class="action-btn btn-danger"
+              onclick="deletePlayer(${player.id})"
+            >
+              Xóa
+            </button>
+
+          </td>
+
+        </tr>
+
+      `).join("");
+
+  }
+
+
+  /* =========================
+     DASHBOARD PLAYERS
+  ========================= */
+
+  function renderDashboardPlayers() {
+
+    const table =
+      document.getElementById("dashboardPlayers");
+
+    table.innerHTML =
+      players
+        .slice(-5)
+        .reverse()
+        .map(player => `
+
+          <tr>
+
+            <td>
+              <strong>
+                ${escapeHtml(player.name)}
+              </strong>
+            </td>
+
+            <td>
+              ${escapeHtml(player.phone || "-")}
+            </td>
+
+            <td>
+              ${player.level}
+            </td>
+
+            <td>
+
+              <span class="badge ${
+                player.checkedIn
+                ? "badge-success"
+                : "badge-warning"
+              }">
+
+                ${
+                  player.checkedIn
+                  ? "Đã check-in"
+                  : "Chưa"
+                }
+
+              </span>
+
+            </td>
+
+            <td>
+
+              <span class="badge ${
+                player.paid
+                ? "badge-success"
+                : "badge-danger"
+              }">
+
+                ${
+                  player.paid
+                  ? "Đã thu"
+                  : "Chưa thu"
+                }
+
+              </span>
+
+            </td>
+
+          </tr>
+
+        `).join("");
+
+  }
+
+
+  /* =========================
+     CHECK-IN
+  ========================= */
+
+  function toggleCheckin(id) {
+
+    const player =
+      players.find(p => p.id === id);
+
+    if (!player) return;
+
+    player.checkedIn =
+      !player.checkedIn;
+
+    saveData();
+
+    renderAll();
+
+  }
+
+
+  /* =========================
+     PAYMENT
+  ========================= */
+
+  function togglePaid(id) {
+
+    const player =
+      players.find(p => p.id === id);
+
+    if (!player) return;
+
+    player.paid =
+      !player.paid;
+
+    saveData();
+
+    renderAll();
+
+  }
+
+
+  /* =========================
+     DELETE
+  ========================= */
+
+  function deletePlayer(id) {
+
+    const player =
+      players.find(p => p.id === id);
+
+    if (!player) return;
+
+    if (
+      !confirm(
+        `Xóa ${player.name} khỏi buổi giao lưu?`
+      )
+    ) return;
+
+    players =
+      players.filter(p => p.id !== id);
+
+    saveData();
+
+    renderAll();
+
+  }
+
+
+  /* =========================
+     COURTS
+  ========================= */
+
+  function renderCourts() {
+
+    const container =
+      document.getElementById("courtDashboard");
+
+    const courts = [1, 2, 3, 4];
+
+
+    container.innerHTML =
+      courts.map(court => {
+
+        const match =
+          matches.find(
+            m => m.court === court
+          );
+
+
+        return `
+
+          <div class="court ${
+            match ? "active" : ""
+          }">
+
+            <div class="court-header">
+
+              <span>
+                Sân ${court}
+              </span>
+
+              <span>
+                ${
+                  match
+                    ? "🟢"
+                    : "⚪"
+                }
+              </span>
+
+            </div>
+
+            <div class="players">
+
+              ${
+                match
+                  ? match.players.join(" · ")
+                  : "Đang trống"
+              }
+
+            </div>
+
+          </div>
+
+        `;
+
+      }).join("");
+
+  }
+
+
+  /* =========================
+     MATCHES
+  ========================= */
+
+  function renderMatches() {
+
+    const container =
+      document.getElementById("matchesList");
+
+
+    if (!matches.length) {
+
+      container.innerHTML =
+        `<div class="empty">
+          Chưa có trận đấu
+        </div>`;
+
+      return;
+
+    }
+
+
+    container.innerHTML =
+      matches.map(match => `
+
+        <div
+          class="card"
+          style="
+            border:1px solid #e2e8f0;
+            margin-bottom:12px;
+          "
+        >
+
+          <div
+            style="
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              gap:20px;
+            "
+          >
+
+            <div>
+
+              <strong>
+                🏸 Sân ${match.court}
+              </strong>
+
+              <p
+                style="
+                  color:#64748b;
+                  margin-top:8px;
+                "
+              >
+                ${match.players.join(" · ")}
+              </p>
+
+            </div>
+
+            <div>
+
+              <span class="badge badge-success">
+                ${match.status}
+              </span>
+
+              <button
+                class="action-btn btn-danger"
+                onclick="deleteMatch(${match.id})"
+              >
+                Xóa
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      `).join("");
+
+  }
+
+
+  function createMatch() {
+
+    const availableCourts =
+      [1,2,3,4].filter(
+        c => !matches.some(
+          m => m.court === c
+        )
+      );
+
+
+    if (!availableCourts.length) {
+
+      alert("Hiện cả 4 sân đều đang được sử dụng.");
+
+      return;
+
+    }
+
+
+    const checkedPlayers =
+      players
+        .filter(p => p.checkedIn)
+        .map(p => p.name);
+
+
+    if (checkedPlayers.length < 2) {
+
+      alert(
+        "Cần ít nhất 2 người đã check-in để tạo trận."
+      );
+
+      return;
+
+    }
+
+
+    const court =
+      availableCourts[0];
+
+
+    const selected =
+      checkedPlayers.slice(0, 4);
+
+
+    matches.push({
+
+      id: Date.now(),
+
+      court,
+
+      players: selected,
+
+      status: "Đang chơi"
+
+    });
+
+
+    saveData();
+
+    renderAll();
+
+  }
+
+
+  function deleteMatch(id) {
+
+    matches =
+      matches.filter(
+        match => match.id !== id
+      );
+
+    saveData();
+
+    renderAll();
+
+  }
+
+
+  /* =========================
+     FINANCE
+  ========================= */
+
+  function renderFinance() {
+
+    const total =
+      players.reduce(
+        (sum, p) => sum + p.fee,
+        0
+      );
+
+
+    const paid =
+      players
+        .filter(p => p.paid)
+        .reduce(
+          (sum, p) => sum + p.fee,
+          0
+        );
+
+
+    const debt =
+      total - paid;
+
+
+    document.getElementById(
+      "financeTotal"
+    ).innerText =
+      money(total);
+
+
+    document.getElementById(
+      "financePaid"
+    ).innerText =
+      money(paid);
+
+
+    document.getElementById(
+      "financeDebt"
+    ).innerText =
+      money(debt);
+
+
+    const table =
+      document.getElementById(
+        "financeTable"
+      );
+
+
+    table.innerHTML =
+      players.map(player => `
+
+        <tr>
+
+          <td>
+            <strong>
+              ${escapeHtml(player.name)}
+            </strong>
+          </td>
+
+          <td>
+            ${money(player.fee)}
+          </td>
+
+          <td>
+
+            <span class="badge ${
+              player.paid
+                ? "badge-success"
+                : "badge-danger"
+            }">
+
+              ${
+                player.paid
+                  ? "Đã thu"
+                  : "Chưa thu"
+              }
+
+            </span>
+
+          </td>
+
+          <td>
+
+            <button
+              class="action-btn btn-secondary"
+              onclick="togglePaid(${player.id})"
+            >
+
+              ${
+                player.paid
+                  ? "Đánh dấu chưa thu"
+                  : "Đã thu tiền"
+              }
+
+            </button>
+
+          </td>
+
+        </tr>
+
+      `).join("");
+
+  }
+
+
+  /* =========================
+     STATS
+  ========================= */
+
+  function renderStats() {
+
+    const revenue =
+      players
+        .filter(p => p.paid)
+        .reduce(
+          (sum, p) => sum + p.fee,
+          0
+        );
+
+
+    document.getElementById(
+      "statPlayers"
+    ).innerText =
+      players.length;
+
+
+    document.getElementById(
+      "statMatches"
+    ).innerText =
+      matches.length;
+
+
+    document.getElementById(
+      "statRevenue"
+    ).innerText =
+      money(revenue);
+
+
+    document.getElementById(
+      "statCourts"
+    ).innerText =
+      `${matches.length}/4`;
+
+  }
+
+
+  /* =========================
+     EVENT
+  ========================= */
+
+  function createEvent() {
+
+    alert(
+      "MVP demo: Có thể mở rộng module này thành form tạo nhiều buổi giao lưu."
+    );
+
+  }
+
+
+  /* =========================
+     HELPERS
+  ========================= */
+
+  function money(number) {
+
+    return new Intl.NumberFormat(
+      "vi-VN"
+    ).format(number) + "đ";
+
+  }
+
+
+  function escapeHtml(value) {
+
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+  }
+
+
+  function renderAll() {
+
+    renderPlayers();
+    renderDashboardPlayers();
+    renderCourts();
+    renderMatches();
+    renderFinance();
+    renderStats();
+
+  }
+
+
+  /* =========================
+     START
+  ========================= */
+
+  renderAll();
+
+</script>
+
+</body>
+</html>
